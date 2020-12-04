@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src=".\babel_6.26.0.min.js"></script>
+    <script>
+      //const esAddress = 'http://192.168.0.12:9200';
+      const esAddress = "http://localhost:9200";
+    </script>
+    <script type="text/javascript">
+      function _arrayBufferToBase64(buffer) {
+        console.log("base64 encoding start");
+        var binary = "";
+        var bytes = new Uint8Array(buffer);
+        var len = bytes.byteLength;
+        for (var i = 0; i < len; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        encodedFile = window.btoa(binary);
+        //console.log('base64 encoding end', encodedFile)
+        return encodedFile;
+      }
+
+      function sendToEs(data) {
+        console.log("waiting encode");
+        let encodedData = _arrayBufferToBase64(data);
+        console.log("got data", encodedData);
+        fetch(
+          esAddress +
+            "/test_index/test_type/test_id?pipeline=attachment&pretty",
+          {
+            mode: "cors",
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ data: encodedData })
+          }
+        )
+          .then(res => res.json())
+          .then(json => console.log(JSON.stringify(json)));
+        console.log("request finished");
+      }
+      // https.get('https://www.w3schools.com/nodejs/ref_http.asp', res => res.on('data', data=>console.log(data.toString(64))) ) returns base64 encoded webpage (with nodejs)
+      let fetchJson = () => {
+        fetch(
+          esAddress +
+            "/test_index/test_type/test_id?pipeline=attachment&pretty",
+          {
+            mode: "cors",
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ data: "aGVsbG8=" })
+          }
+        );
+        //fetch(esAddress + '/test_index/test_type/test_id')
+      };
+
+      let logFile = () => {
+        console.log(document.getElementById("file-input").files[0]);
+        let file = document.getElementById("file-input").files[0];
+        let reader = new FileReader();
+        reader.onload = e => sendToEs(reader.result);
+        reader.readAsArrayBuffer(file);
+      };
+    </script>
+  </head>
+
+  <body>
+    <input type="file" id="file-input" />
+    <button onclick="logFile()">log file contents</button>
+    <button onclick="fetchJson()">es fetch</button>
+  </body>
+</html>

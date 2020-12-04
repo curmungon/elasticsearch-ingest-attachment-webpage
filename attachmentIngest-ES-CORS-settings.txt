@@ -1,0 +1,12 @@
+#es config yml
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+http.cors.allow-headers: X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
+http.max_content_length: 500mb # Defaults to 100mb
+
+
+
+discovery.type: single-node
+
+
+xpack.ml.enabled: false
